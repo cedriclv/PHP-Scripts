@@ -1,19 +1,23 @@
 <?php
+
+require __DIR__ . '/config.php';
 class Database
 {
-
-    public $dsn = 'mysql:host=localhost;dbname=api_users';
-    public $username = 'root';
-    public $password = 'Nicole-1960';
+    public $dsn = 'mysql:host=' . DB_HOST . ';dbname=' . DB_NAME;
+    public $username = DB_USERNAME;
+    public $password = DB_PASSWORD;
     public $pdo = null;
 
     public function getConnect()
     {
-        try {
-            $this->pdo = new PDO($this->dsn, $this->username, $this->password);
-        } catch (PDOException $e) {
-            print "Erreur lors de la connexion";
+        if ($this->pdo === null) {
+            try {
+                $this->pdo = new PDO($this->dsn, $this->username, $this->password);
+                $this->pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+            } catch (PDOException $e) {
+                echo "Erreur lors de la connexion" . $e->getMessage();
+            }
+            return $this->pdo;
         }
-        return $this->pdo;
     }
 }
