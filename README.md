@@ -12,3 +12,21 @@ Ce projet est une API REST basique en PHP permettant d'effectuer des opérations
 - 🔐 Validation simple des inputs
 
 ---
+
+## ⚙️ Exemples de POST
+
+{
+  "name": "Jean Dupont",
+  "email": "jean.dupont@example.com"
+}
+
+## ⚙️ Exemples de Reponse
+
+{
+  "success": true,
+  "message": "Utilisateur ajouté",
+  "data": {
+    "id": 5,
+    "nom": "Jean Dupont",
+  }
+}
