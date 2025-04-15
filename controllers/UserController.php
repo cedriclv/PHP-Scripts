@@ -2,7 +2,7 @@
 
 require __DIR__ . '/../configs/Database.php';
 require __DIR__ . '/../models/User.php';
-
+require __DIR__ . '/../helpers/helpers.php';
 class UserController
 {
     public function getUsers($user)
@@ -23,8 +23,11 @@ class UserController
                 array_push($usersFiltered, $user);
             }
         }
-        $jsonOutput = json_encode($usersFiltered);
-        return $jsonOutput;
+        if (count($usersFiltered) > 0) {
+            sendJsonResponse($usersFiltered, 'liste');
+        } else {
+            sendJsonResponse($usersFiltered, 'liste vide', 404);
+        }
     }
 
     public function updateUser($user)
@@ -41,8 +44,11 @@ class UserController
             "nom" => $parameters->nom
         ];
         $user->update($updatedUser["id"], $updatedUser["nom"]);
-
-        return json_encode($updatedUser);
+        if ($updatedUser != null) {
+            sendJsonResponse($updatedUser, 'utilisateur mis à jour');
+        } else {
+            sendJsonResponse($updatedUser, 'utilisateur non mis à jour', 404);
+        }
     }
 
 
@@ -66,8 +72,11 @@ class UserController
                 $userToDelete = $user;
             }
         }
-
-        return json_encode($userToDelete);
+        if ($userToDelete != null) {
+            sendJsonResponse($userToDelete, 'utilisateur supprimé');
+        } else {
+            sendJsonResponse($userToDelete, 'utilisateur non supprimé', 404);
+        }
     }
 
     public function addUser($userObj)
@@ -91,6 +100,10 @@ class UserController
             "nom" => $parameters->nom
         ];
         $userObj->create($newUser["id"], $newUser["nom"]);
-        return json_encode($newUser);
+        if ($newUser != null) {
+            sendJsonResponse($newUser, 'utilisateur ajouté');
+        } else {
+            sendJsonResponse($newUser, 'utilisateur non ajouté', 404);
+        }
     }
 }
