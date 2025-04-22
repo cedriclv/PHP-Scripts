@@ -4,14 +4,22 @@ require_once __DIR__ . '/../helpers/helpers.php';
 class AuthHelper
 {
 
-
     public static $acceptedKey = [
-        'abcd',
-        '1234'
+        "reader" => 'abcd',
+        "user" => '1234',
+        "admin" => 'ABCD'
+    ];
+
+    public static $keyPerRole = [
+        'abcd' => "reader",
+        '1234' => "user",
+        'ABCD' => "admin"
     ];
 
     public static function checkAuth()
     {
+        $role = "no role yet assigned";
+
         $headers = getallheaders();
         // check that authorization is in the header
         if (!isset($headers["Authorization"])) {
@@ -22,6 +30,7 @@ class AuthHelper
         // get key from header
         if (preg_match('/Bearer\s(\S+)/', $headers["Authorization"], $matches)) {
             $cleanedKey = $matches[1];
+            $role = self::$keyPerRole[$cleanedKey];
         } else {
             http_response_code(401);
             sendJsonResponse(null, "Authorization in wrong format, must be Bearer XXXX... ", 401);
@@ -33,5 +42,7 @@ class AuthHelper
             sendJsonResponse(null, "Authorization not granted", 401);
             exit();
         }
+
+        return $role;
     }
 }

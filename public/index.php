@@ -7,7 +7,7 @@ route();
 
 function route()
 {
-    AuthHelper::checkAuth();
+    $role = AuthHelper::checkAuth();
     echo ("TOTO");
     $userController = new UserController();
     $db = new Database();
@@ -19,13 +19,25 @@ function route()
             echo ($userController->getUsers($userModel));
             break;
         case "POST":
-            echo ($userController->addUser($userModel));
+            if ($role == "user" || $role == "admin {") {
+                echo ($userController->addUser($userModel));
+            } else {
+                sendJsonResponse(null, "no right for this operation", 401);
+            }
             break;
         case "DELETE":
-            echo ($userController->deleteUser($userModel));
+            if ($role == "user" || $role == "admin {") {
+                echo ($userController->deleteUser($userModel));
+            } else {
+                sendJsonResponse(null, "no right for this operation", 401);
+            }
             break;
         case "PUT":
-            echo ($userController->updateUser($userModel));
+            if ($role == "user" || $role == "admin {") {
+                echo ($userController->updateUser($userModel));
+            } else {
+                sendJsonResponse(null, "no right for this operation", 401);
+            }
             break;
         default:
             echo ("mauvaise direction");
