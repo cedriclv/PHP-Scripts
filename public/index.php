@@ -1,11 +1,14 @@
 <?php
 require __DIR__ . '/../src/controllers/UserController.php';
 require __DIR__ . '/../src/models/UserModel.php';
+require __DIR__ . '/../src/helpers/AuthHelper.php';
 
 route();
 
 function route()
 {
+    AuthHelper::checkAuth();
+    echo ("TOTO");
     $userController = new UserController();
     $db = new Database();
     $pdo = $db->getConnect();
