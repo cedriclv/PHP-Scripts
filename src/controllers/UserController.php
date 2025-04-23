@@ -10,7 +10,7 @@ class UserController
     {
         $users = $userModel->getAllUsers();
         $usersArrayFiltered = [];
-        $params = $_GET;
+        $params = array_map('trim', $_GET);
         foreach ($users as $user) {
             $match = true;
             foreach (get_object_vars($user) as $userObjKey => $userObjValue) {
@@ -25,9 +25,11 @@ class UserController
             }
         }
         if (count($usersArrayFiltered) > 0) {
-            sendJsonResponse($usersArrayFiltered, 'liste');
+            http_response_code(200);
+            sendJsonResponse($usersArrayFiltered, 'liste', 200);
         } else {
-            sendJsonResponse($usersArrayFiltered, 'liste vide', 404);
+            http_response_code(200);
+            sendJsonResponse($usersArrayFiltered, 'liste vide', 200);
         }
     }
 
@@ -35,19 +37,25 @@ class UserController
     {
         $input = file_get_contents("php://input");
         $parameters = json_decode($input);
-        if (!isset($parameters->id) || !$parameters->nom) {
+        $id = filter_var($parameters->id, FILTER_VALIDATE_INT, FILTER_NULL_ON_FAILURE);
+        $nom = trim($parameters->nom);
+
+        if (!isset($id) || !$nom) {
             http_response_code(400);
             return json_encode(["Error" => "input manquants"]);
         }
 
         $updatedUser = new User();
-        $updatedUser->id = $parameters->id;
-        $updatedUser->nom = $parameters->nom;
-        $userModel->update($updatedUser);
-        if ($updatedUser != null) {
-            sendJsonResponse($updatedUser->objectToArray(), 'utilisateur mis à jour');
+        $updatedUser->id = $id;
+        $updatedUser->nom = $nom;
+        $result = $userModel->update($updatedUser);
+
+        if ($result) {
+            http_response_code(201);
+            sendJsonResponse($updatedUser->objectToArray(), 'utilisateur mis à jour', 201);
         } else {
-            sendJsonResponse($updatedUser->objectToArray(), 'utilisateur non mis à jour', 404);
+            http_response_code(500);
+            sendJsonResponse($updatedUser->objectToArray(), 'utilisateur non mis à jour', 500);
         }
     }
 
@@ -58,19 +66,27 @@ class UserController
 
         $input = file_get_contents("php://input");
         $parameters = json_decode($input);
-        if (!isset($parameters->id)) {
+        $id = filter_var($parameters->id, FILTER_VALIDATE_INT, FILTER_NULL_ON_FAILURE);
+
+        if (!isset($id)) {
             http_response_code(400);
             return json_encode(["Error" => "input manquants"]);
         }
 
         $userToDelete = null;
 
-        $userToDelete = $userModel->getUserById($parameters->id);
-        $userModel->delete($userToDelete);
+        $userToDelete = $userModel->getUserById($id);
+        if ($userToDelete == null) {
+            http_response_code(404);
+            return json_encode(["Error" => "User non trouvé"]);
+        }
+        $result = $userModel->delete($userToDelete);
 
-        if ($userToDelete != null) {
-            sendJsonResponse($userToDelete->objectToArray(), 'utilisateur supprimé');
+        if ($result) {
+            http_response_code(200);
+            sendJsonResponse($userToDelete->objectToArray(), 'utilisateur supprimé', 200);
         } else {
+            http_response_code(500);
             sendJsonResponse($userToDelete->objectToArray(), 'utilisateur non supprimé', 404);
         }
     }
@@ -82,23 +98,29 @@ class UserController
 
         $input = file_get_contents("php://input");
         $parameters = json_decode($input);
-        if (!isset($parameters->id) || !$parameters->nom) {
+
+        $id = filter_var($parameters->id, FILTER_VALIDATE_INT, FILTER_NULL_ON_FAILURE);
+        $nom = trim($parameters->nom);
+
+        if (!isset($id) || !isset($nom)) {
             http_response_code(400);
             return json_encode(["Error" => "input manquant"]);
         }
         foreach ($users as $user) {
-            if ($user->id == $parameters->id) {
-                http_response_code(200);
+            if ($user->id == $id) {
+                http_response_code(400);
                 return json_encode(["Error" => "id deja existant"]);
             }
         }
-        $newUser->id = $parameters->id;
-        $newUser->nom = $parameters->nom;
-        $userModel->create($newUser);
-        if ($newUser != null) {
-            sendJsonResponse($newUser->objectToArray(), 'utilisateur ajouté');
+        $newUser->id = $id;
+        $newUser->nom = $nom;
+        $result = $userModel->create($newUser);
+        if ($result) {
+            http_response_code(201);
+            sendJsonResponse($newUser->objectToArray(), 'utilisateur ajouté', 201);
         } else {
-            sendJsonResponse($newUser->objectToArray(), 'utilisateur non ajouté', 404);
+            http_response_code(500);
+            sendJsonResponse($newUser->objectToArray(), 'utilisateur non ajouté', 500);
         }
     }
 }

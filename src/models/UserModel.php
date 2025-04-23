@@ -47,7 +47,7 @@ class UserModel
         $query = $this->pdo->prepare("INSERT INTO users (id,nom) VALUES (:newUserId, :newUserName)");
         $query->bindParam(':newUserId', $newUser->id);
         $query->bindParam(':newUserName', $newUser->nom);
-        $query->execute();
+        return $query->execute();
     }
 
     function update($user)
@@ -55,13 +55,13 @@ class UserModel
         $query = $this->pdo->prepare("UPDATE users SET nom = :newUserName WHERE id = :newUserId");
         $query->bindParam(':newUserId', $user->id);
         $query->bindParam(':newUserName', $user->nom);
-        $query->execute();
+        return $query->execute();
     }
 
     function delete($user)
     {
         $query = $this->pdo->prepare("DELETE FROM users WHERE id = :userId");
         $query->bindParam(':userId', $user->id);
-        $query->execute();
+        return $query->execute();
     }
 }

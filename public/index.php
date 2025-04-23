@@ -8,7 +8,6 @@ route();
 function route()
 {
     $role = AuthHelper::checkAuth();
-    echo ("TOTO");
     $userController = new UserController();
     $db = new Database();
     $pdo = $db->getConnect();
